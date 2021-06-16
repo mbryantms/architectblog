@@ -1,0 +1,27 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+django = "*"
+pipenv = "*"
+django-environ = "*"
+whitenoise = "*"
+django-crispy-forms = "*"
+crispy-bootstrap5 = "*"
+django-allauth = "*"
+django-storages = "*"
+django-debug-toolbar = "*"
+psycopg2 = "*"
+argon2-cffi = "*"
+pillow = "*"
+black = "*"
+
+[dev-packages]
+
+[requires]
+python_version = "3.9"
+
+[pipenv]
+allow_prereleases = true
