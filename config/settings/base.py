@@ -9,6 +9,7 @@ https://docs.djangoproject.com/en/3.2/ref/settings/
 """
 from pathlib import Path
 import environ
+from os import path
 
 ROOT_DIR = Path(__file__).resolve(strict=True).parent.parent.parent
 APPS_DIR = ROOT_DIR / "architectblog"
@@ -61,7 +62,6 @@ DATABASES = {
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-
 # URLS
 # ------------------------------------------------------------------------------
 # https://docs.djangoproject.com/en/dev/ref/settings/#root-urlconf
@@ -72,9 +72,10 @@ WSGI_APPLICATION = "config.wsgi.application"
 # APPS
 # ------------------------------------------------------------------------------
 DJANGO_APPS = [
-    "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
+    "filebrowser",
+    "django.contrib.admin",
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
@@ -87,9 +88,11 @@ THIRD_PARTY_APPS = [
     "allauth",
     "allauth.account",
     "allauth.socialaccount",
+    "tinymce",
 ]
 LOCAL_APPS = [
     "architectblog.users.apps.UsersConfig",
+    "architectblog.blog.apps.BlogConfig",
 ]
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
 
@@ -155,7 +158,7 @@ STATIC_ROOT = str(ROOT_DIR / "staticfiles")
 # https://docs.djangoproject.com/en/dev/ref/settings/#static-url
 STATIC_URL = "/static/"
 # https://docs.djangoproject.com/en/dev/ref/contrib/staticfiles/#std:setting-STATICFILES_DIRS
-STATICFILES_DIRS = [str(APPS_DIR / "static")]
+STATICFILES_DIRS = [str(APPS_DIR / "static"), str(ROOT_DIR / "node_modules")]
 # https://docs.djangoproject.com/en/dev/ref/contrib/staticfiles/#staticfiles-finders
 STATICFILES_FINDERS = [
     "django.contrib.staticfiles.finders.FileSystemFinder",
@@ -166,11 +169,11 @@ STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 # MEDIA
 # ------------------------------------------------------------------------------
 # https://docs.djangoproject.com/en/dev/ref/settings/#media-root
-MEDIA_ROOT = str(APPS_DIR / "media")
+MEDIA_ROOT = path.join(APPS_DIR / "media/")
 # https://docs.djangoproject.com/en/dev/ref/settings/#media-url
 MEDIA_URL = "/media/"
 # https://django-storages.readthedocs.io/en/latest/backends/amazon-S3.html
-DEFAULT_FILE_STORAGE = "storages.backends.s3boto3.S3Boto3Storage"
+# DEFAULT_FILE_STORAGE = "storages.backends.s3boto3.S3Boto3Storage"
 
 # TEMPLATES
 # ------------------------------------------------------------------------------
@@ -203,7 +206,6 @@ TEMPLATES = [
         },
     },
 ]
-
 
 # django-allauth
 # ------------------------------------------------------------------------------
@@ -240,7 +242,7 @@ AWS_SECRET_ACCESS_KEY = env("DJANGO_AWS_SECRET_ACCESS_KEY")
 # https://django-storages.readthedocs.io/en/latest/backends/amazon-S3.html#settings
 AWS_STORAGE_BUCKET_NAME = env("DJANGO_AWS_STORAGE_BUCKET_NAME")
 # https://django-storages.readthedocs.io/en/latest/backends/amazon-S3.html#settings
-AWS_QUERYSTRING_AUTH = False
+# AWS_QUERYSTRING_AUTH = False
 # DO NOT change these unless you know what you're doing.
 _AWS_EXPIRY = 60 * 60 * 24 * 7
 # https://django-storages.readthedocs.io/en/latest/backends/amazon-S3.html#settings
@@ -251,4 +253,67 @@ AWS_S3_OBJECT_PARAMETERS = {
 AWS_S3_REGION_NAME = env("DJANGO_AWS_S3_REGION_NAME", default=None)
 # https://django-storages.readthedocs.io/en/latest/backends/amazon-S3.html#cloudfront
 AWS_S3_CUSTOM_DOMAIN = env("DJANGO_AWS_S3_CUSTOM_DOMAIN", default=None)
-aws_s3_domain = AWS_S3_CUSTOM_DOMAIN or f"{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com"
+AWS_S3_DOMAIN = AWS_S3_CUSTOM_DOMAIN or f"{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com"
+
+TINYMCE_DEFAULT_CONFIG = {
+    "skin": "ARCHITECT",
+    "height": "1000",
+    "menubar": "file edit view insert format tools table help",
+    "plugins": "print preview paste importcss searchreplace autolink autosave save directionality code visualblocks visualchars fullscreen image link media template codesample table charmap hr pagebreak nonbreaking anchor toc insertdatetime advlist lists wordcount imagetools textpattern noneditable help charmap quickbars emoticons"
+    "searchreplace,visualblocks,code,fullscreen,insertdatetime,media,table,paste,"
+    "code,help,wordcount",
+    "toolbar": "undo redo | bold italic underline strikethrough | fontselect fontsizeselect formatselect | alignleft aligncenter alignright alignjustify | outdent indent |  numlist bullist | forecolor backcolor removeformat | pagebreak | charmap emoticons | fullscreen  preview save print | insertfile image media template link anchor codesample | ltr rtl",
+    "toolbar_sticky": "true",
+}
+TINYMCE_FILEBROWSER = True
+
+X_FRAME_OPTIONS = "SAMEORIGIN"
+
+FILEBROWSER_VERSIONS = {
+    "admin_thumbnail": {
+        "verbose_name": "Admin Thumbnail",
+        "width": 60,
+        "height": 60,
+        "opts": "crop",
+    },
+    "thumbnail": {
+        "verbose_name": "Thumbnail (1 col)",
+        "width": 60,
+        "height": 60,
+        "opts": "crop",
+    },
+    "small": {"verbose_name": "Small (2 col)", "width": 140, "height": "", "opts": ""},
+    "small_webp": {
+        "verbose_name": "Small (2 col)",
+        "width": 140,
+        "height": "",
+        "opts": "",
+        "webp": True,
+    },
+    "medium": {
+        "verbose_name": "Medium (4col )",
+        "width": 300,
+        "height": "",
+        "opts": "",
+        "webp": True,
+    },
+    "big": {
+        "verbose_name": "Big (6 col)",
+        "width": 460,
+        "height": "",
+        "opts": "",
+        "webp": True,
+    },
+    "large": {
+        "verbose_name": "Large (8 col)",
+        "width": 680,
+        "height": "",
+        "opts": "",
+        "webp": True,
+    },
+}
+
+FILEBROWSER_MEDIA_ROOT = MEDIA_ROOT
+FILEBROWSER_MEDIA_URL = MEDIA_URL
+FILEBROWSER_DIRECTORY = "uploads/"
+DATA_UPLOAD_MAX_MEMORY_SIZE = 10485760

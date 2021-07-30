@@ -1,0 +1,117 @@
+{% extends "base_2col.html" %}
+
+{% block extrahead %}
+    {% load static %}
+    <link rel="stylesheet" type="text/css" href="{% static "prism.css" %}">
+{% endblock extrahead %}
+
+{% block main %}
+    {% load blog_tags blog_extras %}
+    <h2>{{ title }}</h2>
+    <hr>
+    <form class="row" action="{{ request.path }}" method="GET">
+        <div class="col-md-8">
+            <label for="searchbar" class="visually-hidden">Site search:</label>
+            <input type="search" class="form-control" name="q" value="{{ q }}" id="searchbar"></div>
+        <div class="col-6 col-md-4">
+            <button type="submit" class="search-submit btn btn-outline-secondary">Search</button>
+        </div>
+        <div class="col">
+            {% if selected %}
+                {% for pair in selected.items %}
+                    {% if pair.0 == 'tags' %}
+                        {% for tag in pair.1 %}
+                            <input type="hidden" name="tag" value="{{ tag }}">
+                        {% endfor %}
+                    {% else %}
+                        <input type="hidden" name="{{ pair.0 }}" value="{{ pair.1 }}">
+                    {% endif %}
+                {% endfor %}
+            {% endif %}
+        </div>
+    </form>
+
+    {% if selected %}
+        <p class="search-selections">
+            Filters:
+            {% if selected.type %}
+                <span class="badge rounded-pill bg-secondary"><a class="selected-tag"
+                                                                 href="{% remove_qsarg "type" selected.type %}">Type: {{ selected.type }}
+                <strong>&#x00D7;</strong></a></span>
+            {% endif %}
+            {% if selected.year %}
+                <span class="badge rounded-pill bg-secondary"><a class="selected-tag"
+                                                                 href="{% remove_qsarg "year" selected.year %}">Year: {{ selected.year }}
+                <strong>&#x00D7;</strong></a></span>
+            {% endif %}
+            {% if selected.month %}
+                <span class="badge rounded-pill bg-secondary"><a class="selected-tag"
+                                                                 href="{% remove_qsarg "month" selected.month %}">Month: {{ selected.month }}
+                <strong>&#x00D7;</strong></a></span>
+            {% endif %}
+            {% for tag in selected.tags %}
+                <span class="badge rounded-pill bg-secondary"><a class="selected-tag"
+                                                                 href="{% remove_qsarg "tag" tag %}">{{ tag }} <strong>&#x00D7;</strong></a></span>
+            {% endfor %}
+        </p>
+    {% endif %}
+
+    <br>
+
+    {% if total %}
+        {% if selected or q %}
+            {% include "_pagination.html" with page_total=total %}
+            {% blog_mixed_list_with_dates results %}
+            {% include "_pagination.html" %}
+        {% endif %}
+    {% else %}
+        {% if selected or q %}
+            <p><em>No results found</em></p>
+        {% endif %}
+    {% endif %}
+
+{% endblock %}
+
+{% block sidebar %}
+    <div class="metabox">
+        {% if type_counts %}
+            <h3>Types</h3>
+            <ul>
+                {% for t in type_counts %}
+                    <a class="btn btn-sm btn-secondary"
+                       href="{% add_qsarg "type" t.type %}">{{ t.type }} <span
+                            class="badge bg-dark">{{ t.n }}</span></a>
+                {% endfor %}
+            </ul>
+        {% endif %}
+        {% if year_counts %}
+            <h3>Years</h3>
+            <ul>
+                {% for t in year_counts %}
+                    <a class="btn btn-sm btn-secondary"
+                       href="{% add_qsarg "year" t.year|date:"Y" %}">{{ t.year|date:"Y" }} <span
+                            class="badge bg-dark">{{ t.n }}</span></a>
+                {% endfor %}
+            </ul>
+        {% endif %}
+        {% if month_counts %}
+            <h3>Months</h3>
+            <ul>
+                {% for t in month_counts %}
+                    <a class="btn btn-sm btn-secondary"
+                       href="{% add_qsarg "month" t.month|date:"n" %}">{{ t.month|date:"F" }} <span
+                            class="badge bg-dark">{{ t.n }}</span></a>
+                {% endfor %}
+            </ul>
+        {% endif %}
+        {% if tag_counts %}
+            <h3>Tags</h3>
+            <ul>
+                {% for t in tag_counts %}
+                    <a class="btn btn-sm btn-secondary"
+                       href="{% add_qsarg "tag" t.tag %}">{{ t.tag }} <span class="badge bg-dark">{{ t.n }}</span></a>
+                {% endfor %}
+            </ul>
+        {% endif %}
+    </div>
+{% endblock %}

@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+
+{% block extrahead %}
+    {% load static %}
+    <link rel="stylesheet" type="text/css" href="{% static "prism.css" %}">
+{% endblock extrahead %}
+
+{% block content %}
+    <main class="home">
+    <h2>Archive for {{ month|date:"F Y" }}</h2>
+    <hr>
+    <ul>
+        {% for entry in entries %}
+            <li>{{ entry.created_time|date:"jS"}}: <a href="{{ entry.get_absolute_url }}">{{ entry.title }}</a></li>
+        {% endfor %}
+
+
+
+    <br><br><br>
+
+{% endblock content %}
+{% block sidebar %}
+
+    <div>
+        <h2>
+            <span>Elsewhere</span>
+        </h2>
+    </div> <!-- elsewhere -->
+    <div class="readmore">
+        <a href="#">Elsewhere archive &rarr;</a>
+    </div>
+
+    </main>
+{% endblock sidebar %}

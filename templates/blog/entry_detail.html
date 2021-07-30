@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+
+{% block extrahead %}
+    {% load static %}
+    <link rel="stylesheet" type="text/css" href="{% static "prism.css" %}">
+    <script src="{% static "prism.js" %}"></script>
+{% endblock extrahead %}
+
+{% block content %}
+    <main class="home">
+
+    <h1>{{ entry.title }}</h1>
+    <div class="fs-6">{{ entry.created_time| date }}
+        {{ entry.created_time| date:"P" }}</div>
+    <p>{{ entry.content|safe }}</p>
+    <br>
+    <div class="small">TAGS</div>
+    {% include "_tags.html" with obj=entry %}
+    <br>
+    <br>
+
+
+
+{% endblock content %}
+{% block sidebar %}
+
+    <div>
+        <h2>
+            <span>Elsewhere</span>
+        </h2>
+    </div> <!-- elsewhere -->
+    <div class="readmore">
+        <a href="#">Elsewhere archive &rarr;</a>
+    </div>
+
+    </main>
+{% endblock sidebar %}

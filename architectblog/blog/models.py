@@ -1,324 +1,265 @@
 from django.db import models
 from django.utils.timezone import now
+from django.contrib.postgres.search import SearchVectorField
+from django.contrib.postgres.indexes import GinIndex
+from django.conf import settings
+from django.utils.text import Truncator
+from django.utils.html import strip_tags, escape
+from tinymce.models import HTMLField
+from django.urls import reverse
+from django.utils.safestring import mark_safe
+from django.utils import timezone
+from collections import Counter
+import re
+
+tag_re = re.compile("^[a-z0-9]+$")
+
+
+class Tag(models.Model):
+    tag = models.SlugField(unique=True)
+
+    def __str__(self):
+        return self.tag
+
+    def get_absolute_url(self):
+        return reverse("blog:tag_detail", args=[self.tag])
+
+    def get_link(self, reltag=False):
+        return mark_safe(
+            '<a href="%s"%s>%s</a>'
+            % (self.get_absolute_url(), (reltag and ' rel="tag"' or ""), self)
+        )
+
+    def get_reltag(self):
+        return self.get_link(reltag=True)
+
+    def entry_count(self):
+        return self.entry_set.count()
+
+    def link_count(self):
+        return self.blogmark_set.count()
+
+    def quote_count(self):
+        return self.quotation_set.count()
+
+    def total_count(self):
+        return self.entry_count() + self.link_count() + self.quote_count()
+
+    def all_types_queryset(self):
+        entries = (
+            self.entry_set.all()
+            .annotate(type=models.Value("entry", output_field=models.CharField()))
+            .values("pk", "created", "type")
+        )
+        blogmarks = (
+            self.blogmark_set.all()
+            .annotate(type=models.Value("blogmark", output_field=models.CharField()))
+            .values("pk", "created", "type")
+        )
+        quotations = (
+            self.quotation_set.all()
+            .annotate(type=models.Value("quotation", output_field=models.CharField()))
+            .values("pk", "created", "type")
+        )
+        return entries.union(blogmarks, quotations).order_by("-created")
+
+    def get_related_tags(self, limit=10):
+        """Get all items tagged with this, look at /their/ tags, order by count"""
+        if not hasattr(self, "_related_tags"):
+            counts = Counter()
+            for klass, collection in (
+                (Entry, "entry_set"),
+                (Blogmark, "blogmark_set"),
+                (Quotation, "quotation_set"),
+            ):
+                qs = klass.objects.filter(
+                    pk__in=getattr(self, collection).all()
+                ).values_list("tags__tag", flat=True)
+                counts.update(t for t in qs if t != self.tag)
+            tag_names = [p[0] for p in counts.most_common(limit)]
+            tags_by_name = {t.tag: t for t in Tag.objects.filter(tag__in=tag_names)}
+            # Need a list in the correct order
+            self._related_tags = [tags_by_name[name] for name in tag_names]
+        return self._related_tags
 
 
 class BaseModel(models.Model):
-    created_time = models.DateTimeField(verbose_name="Creation time", default=now)
-    last_mod_time = models.DateTimeField("修改时间", default=now)
-
+    created_time = models.DateTimeField(
+        verbose_name="Creation time", default=timezone.now
+    )
     tags = models.ManyToManyField(Tag, blank=True)
     slug = models.SlugField(max_length=64)
     latitude = models.FloatField(blank=True, null=True)
     longitude = models.FloatField(blank=True, null=True)
-    metadata = JSONField(blank=True, default=dict)
+    metadata = models.JSONField(blank=True, default=dict)
     search_document = SearchVectorField(null=True)
 
-    def save(self, *args, **kwargs):
-        is_update_views = (
-            isinstance(self, Article)
-            and "update_fields" in kwargs
-            and kwargs["update_fields"] == ["views"]
-        )
-        if is_update_views:
-            Article.objects.filter(pk=self.pk).update(views=self.views)
-            Article.objects.filter(pk=self.pk).update(views=self.views)
-        else:
-            if "slug" in self.__dict__:
-                slug = (
-                    getattr(self, "title")
-                    if "title" in self.__dict__
-                    else getattr(self, "name")
-                )
-                setattr(self, "slug", slugify(slug))
-            super().save(*args, **kwargs)
+    @property
+    def type(self):
+        return self._meta.model_name
 
-    def get_full_url(self):
-        site = get_current_site().domain
-        url = "https://{site}{path}".format(site=site, path=self.get_absolute_url())
-        return url
+    def tag_summary(self):
+        return " ".join(t.tag for t in self.tags.all())
 
     class Meta:
         abstract = True
-
-    @abstractmethod
-    def get_absolute_url(self):
-        pass
+        ordering = ("-created_time",)
+        indexes = [GinIndex(fields=["search_document"])]
 
 
-class Article(BaseModel):
-    """文章"""
+class Series(models.Model):
+    title = models.CharField(max_length=300)
+    slug = models.SlugField()
+    description = models.TextField(blank=True)
 
-    STATUS_CHOICES = (
-        ("d", "草稿"),
-        ("p", "发表"),
-    )
-    COMMENT_STATUS = (
-        ("o", "打开"),
-        ("c", "关闭"),
-    )
-    TYPE = (
-        ("a", "文章"),
-        ("p", "页面"),
-    )
-    title = models.CharField("标题", max_length=200, unique=True)
-    body = MDTextField("正文")
-    pub_time = models.DateTimeField("发布时间", blank=False, null=False, default=now)
-    status = models.CharField("文章状态", max_length=1, choices=STATUS_CHOICES, default="p")
-    comment_status = models.CharField(
-        "评论状态", max_length=1, choices=COMMENT_STATUS, default="o"
-    )
-    type = models.CharField("类型", max_length=1, choices=TYPE, default="a")
-    views = models.PositiveIntegerField("浏览量", default=0)
-    author = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
-        verbose_name="作者",
-        blank=False,
-        null=False,
-        on_delete=models.CASCADE,
-    )
-    article_order = models.IntegerField(
-        "排序,数字越大越靠前", blank=False, null=False, default=0
-    )
-    category = models.ForeignKey(
-        "Category", verbose_name="分类", on_delete=models.CASCADE, blank=False, null=False
-    )
-    tags = models.ManyToManyField("Tag", verbose_name="标签集合", blank=True)
-
-    def body_to_string(self):
-        return self.body
+    class Meta:
+        verbose_name_plural = "series"
 
     def __str__(self):
         return self.title
 
-    class Meta:
-        ordering = ["-article_order", "-pub_time"]
-        verbose_name = "文章"
-        verbose_name_plural = verbose_name
-        get_latest_by = "id"
+    def get_absolute_url(self):
+        return reverse("series-detail", args=[self.slug])
+
+    def get_entries_in_order(self):
+        return self.entries.order_by("created_time")
+
+
+class Entry(BaseModel):
+    STATUS_CHOICES = (
+        ("d", "draft"),
+        ("p", "published"),
+    )
+
+    title = models.CharField("title", max_length=300, unique=True)
+    content = HTMLField()
+    pub_time = models.DateTimeField(
+        "publication time", blank=False, null=False, default=now
+    )
+    status = models.CharField(
+        "status", max_length=1, choices=STATUS_CHOICES, default="p"
+    )
+    views = models.PositiveIntegerField("views", default=0)
+    author = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        verbose_name="author",
+        blank=False,
+        null=False,
+        on_delete=models.CASCADE,
+    )
+    series = models.ForeignKey(
+        Series, related_name="entries", blank=True, null=True, on_delete=models.SET_NULL
+    )
+
+    def __str__(self):
+        return (
+            self.title
+            if self.title
+            else Truncator(strip_tags(self.content)).words(15, truncate=" …")
+        )
 
     def get_absolute_url(self):
         return reverse(
-            "blog:detailbyid",
+            "blog:entry_detail",
             kwargs={
-                "article_id": self.id,
-                "year": self.created_time.year,
-                "month": self.created_time.month,
-                "day": self.created_time.day,
+                "slug": self.slug,
+                "year": self.pub_time.year,
+                "month": self.pub_time.strftime("%m"),
+                "day": self.pub_time.day,
             },
         )
 
-    @cache_decorator(60 * 60 * 10)
-    def get_category_tree(self):
-        tree = self.category.get_category_tree()
-        names = list(map(lambda c: (c.name, c.get_absolute_url()), tree))
+    def index_components(self):
+        return {
+            "A": self.title,
+            "C": strip_tags(self.content),
+            "B": " ".join(self.tags.values_list("tag", flat=True)),
+        }
 
-        return names
+    class Meta:
+        verbose_name_plural = "entries"
 
-    def save(self, *args, **kwargs):
-        super().save(*args, **kwargs)
 
-    def viewed(self):
-        self.views += 1
-        self.save(update_fields=["views"])
+class Blogmark(BaseModel):
+    link_url = models.URLField(max_length=1000)
+    link_title = models.CharField(max_length=255)
+    via_url = models.URLField(blank=True, null=True)
+    via_title = models.CharField(max_length=255, blank=True, null=True)
+    commentary = models.TextField()
 
-    def comment_list(self):
-        cache_key = "article_comments_{id}".format(id=self.id)
-        value = cache.get(cache_key)
-        if value:
-            logger.info("get article comments:{id}".format(id=self.id))
-            return value
+    is_blogmark = True
+
+    def index_components(self):
+        return {
+            "A": self.link_title,
+            "B": " ".join(self.tags.values_list("tag", flat=True)),
+            "C": self.commentary
+            + " "
+            + self.link_domain()
+            + " "
+            + (self.via_title or ""),
+        }
+
+    def __str__(self):
+        return self.link_title
+
+    def link_domain(self):
+        return self.link_url.split("/")[2]
+
+    def word_count(self):
+        count = len(self.commentary.split())
+        if count == 1:
+            return "1 word"
         else:
-            comments = self.comment_set.filter(is_enable=True)
-            cache.set(cache_key, comments, 60 * 100)
-            logger.info("set article comments:{id}".format(id=self.id))
-            return comments
-
-    def get_admin_url(self):
-        info = (self._meta.app_label, self._meta.model_name)
-        return reverse("admin:%s_%s_change" % info, args=(self.pk,))
-
-    @cache_decorator(expiration=60 * 100)
-    def next_article(self):
-        # 下一篇
-        return Article.objects.filter(id__gt=self.id, status="p").order_by("id").first()
-
-    @cache_decorator(expiration=60 * 100)
-    def prev_article(self):
-        # 前一篇
-        return Article.objects.filter(id__lt=self.id, status="p").first()
+            return "%d words" % count
 
 
-class Category(BaseModel):
-    """文章分类"""
+class Quotation(BaseModel):
+    quotation = models.TextField()
+    source = models.CharField(max_length=255)
+    source_url = models.URLField(blank=True, null=True)
 
-    name = models.CharField("分类名", max_length=30, unique=True)
-    parent_category = models.ForeignKey(
-        "self", verbose_name="父级分类", blank=True, null=True, on_delete=models.CASCADE
-    )
-    slug = models.SlugField(default="no-slug", max_length=60, blank=True)
+    is_quotation = True
 
-    class Meta:
-        ordering = ["name"]
-        verbose_name = "分类"
-        verbose_name_plural = verbose_name
+    def title(self):
+        """Mainly a convenience for the comments RSS feed"""
+        return "A quote from %s" % escape(self.source)
 
-    def get_absolute_url(self):
-        return reverse("blog:category_detail", kwargs={"category_name": self.slug})
+    def index_components(self):
+        return {
+            "A": self.quotation,
+            "B": " ".join(self.tags.values_list("tag", flat=True)),
+            "C": self.source,
+        }
 
     def __str__(self):
-        return self.name
-
-    @cache_decorator(60 * 60 * 10)
-    def get_category_tree(self):
-        """
-        递归获得分类目录的父级
-        :return:
-        """
-        categorys = []
-
-        def parse(category):
-            categorys.append(category)
-            if category.parent_category:
-                parse(category.parent_category)
-
-        parse(self)
-        return categorys
-
-    @cache_decorator(60 * 60 * 10)
-    def get_sub_categorys(self):
-        """
-        获得当前分类目录所有子集
-        :return:
-        """
-        categorys = []
-        all_categorys = Category.objects.all()
-
-        def parse(category):
-            if category not in categorys:
-                categorys.append(category)
-            childs = all_categorys.filter(parent_category=category)
-            for child in childs:
-                if category not in categorys:
-                    categorys.append(child)
-                parse(child)
-
-        parse(self)
-        return categorys
+        return self.quotation
 
 
-class Tag(BaseModel):
-    """文章标签"""
-
-    name = models.CharField("标签名", max_length=30, unique=True)
-    slug = models.SlugField(default="no-slug", max_length=60, blank=True)
-
-    def __str__(self):
-        return self.name
-
-    def get_absolute_url(self):
-        return reverse("blog:tag_detail", kwargs={"tag_name": self.slug})
-
-    @cache_decorator(60 * 60 * 10)
-    def get_article_count(self):
-        return Article.objects.filter(tags__name=self.name).distinct().count()
-
-    class Meta:
-        ordering = ["name"]
-        verbose_name = "标签"
-        verbose_name_plural = verbose_name
-
-
-class Links(models.Model):
-    """友情链接"""
-
-    name = models.CharField("链接名称", max_length=30, unique=True)
-    link = models.URLField("链接地址")
-    sequence = models.IntegerField("排序", unique=True)
-    is_enable = models.BooleanField("是否显示", default=True, blank=False, null=False)
-    show_type = models.CharField(
-        "显示类型", max_length=1, choices=LinkShowType.choices, default=LinkShowType.I
-    )
-    created_time = models.DateTimeField("创建时间", default=now)
-    last_mod_time = models.DateTimeField("修改时间", default=now)
-
-    class Meta:
-        ordering = ["sequence"]
-        verbose_name = "友情链接"
-        verbose_name_plural = verbose_name
-
-    def __str__(self):
-        return self.name
-
-
-class SideBar(models.Model):
-    """侧边栏,可以展示一些html内容"""
-
-    name = models.CharField("标题", max_length=100)
-    content = models.TextField("内容")
-    sequence = models.IntegerField("排序", unique=True)
-    is_enable = models.BooleanField("是否启用", default=True)
-    created_time = models.DateTimeField("创建时间", default=now)
-    last_mod_time = models.DateTimeField("修改时间", default=now)
-
-    class Meta:
-        ordering = ["sequence"]
-        verbose_name = "侧边栏"
-        verbose_name_plural = verbose_name
-
-    def __str__(self):
-        return self.name
-
-
-class BlogSettings(models.Model):
-    """站点设置"""
-
-    sitename = models.CharField(
-        "网站名称", max_length=200, null=False, blank=False, default=""
-    )
-    site_description = models.TextField(
-        "网站描述", max_length=1000, null=False, blank=False, default=""
-    )
-    site_seo_description = models.TextField(
-        "网站SEO描述", max_length=1000, null=False, blank=False, default=""
-    )
-    site_keywords = models.TextField(
-        "网站关键字", max_length=1000, null=False, blank=False, default=""
-    )
-    article_sub_length = models.IntegerField("文章摘要长度", default=300)
-    sidebar_article_count = models.IntegerField("侧边栏文章数目", default=10)
-    sidebar_comment_count = models.IntegerField("侧边栏评论数目", default=5)
-    show_google_adsense = models.BooleanField("是否显示谷歌广告", default=False)
-    google_adsense_codes = models.TextField(
-        "广告内容", max_length=2000, null=True, blank=True, default=""
-    )
-    open_site_comment = models.BooleanField("是否打开网站评论功能", default=True)
-    beiancode = models.CharField(
-        "备案号", max_length=2000, null=True, blank=True, default=""
-    )
-    analyticscode = models.TextField(
-        "网站统计代码", max_length=1000, null=False, blank=False, default=""
-    )
-    show_gongan_code = models.BooleanField("是否显示公安备案号", default=False, null=False)
-    gongan_beiancode = models.TextField(
-        "公安备案号", max_length=2000, null=True, blank=True, default=""
-    )
-    resource_path = models.CharField(
-        "静态文件保存地址", max_length=300, null=False, default="/var/www/resource/"
-    )
-
-    class Meta:
-        verbose_name = "网站配置"
-        verbose_name_plural = verbose_name
-
-    def __str__(self):
-        return self.sitename
-
-    def clean(self):
-        if BlogSettings.objects.exclude(id=self.id).count():
-            raise ValidationError(_("只能有一个配置"))
-
-    def save(self, *args, **kwargs):
-        super().save(*args, **kwargs)
-        from DjangoBlog.utils import cache
-
-        cache.clear()
+def load_mixed_objects(dicts):
+    """
+    Takes a list of dictionaries, each of which must at least have a 'type'
+    and a 'pk' key. Returns a list of ORM objects of those various types.
+    Each returned ORM object has a .original_dict attribute populated.
+    """
+    to_fetch = {}
+    for d in dicts:
+        to_fetch.setdefault(d["type"], set()).add(d["pk"])
+    fetched = {}
+    for key, model in (
+        ("blogmark", Blogmark),
+        ("entry", Entry),
+        ("quotation", Quotation),
+    ):
+        ids = to_fetch.get(key) or []
+        objects = model.objects.prefetch_related("tags").filter(pk__in=ids)
+        for obj in objects:
+            fetched[(key, obj.pk)] = obj
+    # Build list in same order as dicts argument
+    to_return = []
+    for d in dicts:
+        item = fetched.get((d["type"], d["pk"])) or None
+        if item:
+            item.original_dict = d
+        to_return.append(item)
+    return to_return

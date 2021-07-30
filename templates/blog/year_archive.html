@@ -1,0 +1,59 @@
+{% extends "base_2col.html" %}
+{% load blog_extras %}
+
+{% block extrahead %}
+    {% load static %}
+    <link rel="stylesheet" type="text/css" href="{% static "prism.css" %}">
+{% endblock extrahead %}
+
+{% block main %}
+    <div class="home">
+        <h2>Archive for {{ year|date:"Y" }}</h2>
+        <hr>
+        {% for month in months %}
+
+            <h3><a href="/blog/{{ month.date|date:"Y" }}/{{ month.date|date:"m" }}/">{{ month.date|date:"F" }}</a></h3>
+            <p class="lead fs-6">
+                {% for count in month.counts_not_0 %}
+                    {{ count.1 }}
+                    {% if count.0 == "entry" %}
+                        {{ count.1|pluralize:"entry,entries" }}
+                    {% else %}
+                        {{ count.0 }}{{ count.1|pluralize }}
+                    {% endif %}
+                    {% if not forloop.last %}/{% endif %}
+                {% endfor %}
+
+            </p>
+            {% if month.entries %}
+                <ul>
+                {% for entry in month.entries %}
+                    <li>
+                        <div><a href="{{ entry.get_absolute_url }}">{{ entry.title }}</a></div>
+                    </li>
+                {% endfor %}
+            {% endif %}
+
+        </ul>
+        {% endfor %}
+
+
+        <br><br><br>
+    </div>
+
+{% endblock main %}
+{% block sidebar %}
+
+    <div>
+        <h2>
+            <span>{{ year|date:"Y" }} breakdown</span>
+        </h2>
+        {% for date in date_list %}
+            <li><a href="/blog/{{ year|date:"Y" }}/{{ date|date:"m" }}/">{{ date|date:"F" }}</a></li>
+        {% endfor %}
+    </div> <!-- elsewhere -->
+    <div class="readmore">
+        <a href="#">Elsewhere archive &rarr;</a>
+    </div>
+
+{% endblock sidebar %}

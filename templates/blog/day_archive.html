@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+
+{% block extrahead %}
+    {% load static %}
+    <link rel="stylesheet" type="text/css" href="{% static "prism.css" %}">
+{% endblock extrahead %}
+
+{% block content %}
+    <main class="home">
+    <h2>Articles for {{ day|date:"F j Y" }}</h2>
+    <hr>
+    <ul>
+        {% for date in date_list %}
+            <li><a href="/{{ year|date:"Y" }}/{{ date|date:"m" }}/">{{ date|date:"F" }}</a></li>
+        {% endfor %}
+        {% for entry in entry_list %}
+            </ul>
+            <h3><a href="{{ entry.get_absolute_url }}">{{ entry.title }}</a></h3>
+            <p>{{ entry.content|safe|truncatewords_html:100 }}</p>
+            <hr>
+        {% endfor %}
+
+    <br><br><br>
+
+{% endblock content %}
+{% block sidebar %}
+
+    <div>
+        <h2>
+            <span>Elsewhere</span>
+        </h2>
+    </div> <!-- elsewhere -->
+    <div class="readmore">
+        <a href="#">Elsewhere archive &rarr;</a>
+    </div>
+
+    </main>
+{% endblock sidebar %}

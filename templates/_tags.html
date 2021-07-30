@@ -1,0 +1,9 @@
+{% if obj.tags.count %}
+    {% for tag in obj.tags.all %}
+        <a class="btn btn-sm btn-secondary" href="{{ tag.get_absolute_url }}" rel="tag">
+
+            {{ tag.tag }}
+            <span class="badge bg-dark">{{ tag.total_count }}</span>
+        </a>
+    {% endfor %}
+{% endif %}

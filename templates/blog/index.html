@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+
+{% block extrahead %}
+    {% load static %}
+    <link rel="stylesheet" type="text/css" href="{% static "prism.css" %}">
+{% endblock extrahead %}
+
+{% block content %}
+    <div class="home">
+        {% for item in entries %}
+            <h1><a href="{{ item.get_absolute_url }}">{{ item.title }}</a></h1>
+            <p class="fs-6">posted by {{ item.author|capfirst }} &nbsp; {{ item.created_time| date }} {{ item.created_time| date:"P" }}</p>
+
+            <p>{{ item.content|safe }}</p>
+            <br>
+            <div class="small">TAGS</div>
+            {% include "_tags.html" with obj=item %}
+            <br>
+            <br>
+
+            <hr>
+
+        {% endfor %}
+
+    </div>
+
+{% endblock content %}

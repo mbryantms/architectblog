@@ -17,6 +17,10 @@ psycopg2 = "*"
 argon2-cffi = "*"
 pillow = "*"
 black = "*"
+boto3 = "*"
+django-tinymce = "*"
+django-taggit = "*"
+django-filebrowser-no-grappelli2 = "*"
 
 [dev-packages]
 
