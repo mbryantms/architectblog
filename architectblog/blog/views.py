@@ -1,21 +1,25 @@
-from django.views.generic.list import ListView
+import datetime
+import time
+from itertools import chain
+from operator import attrgetter
+
+from django.contrib.postgres.search import SearchQuery, SearchRank
+from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
+from django.db import models
+from django.db.models.functions import TruncMonth, TruncYear
+from django.http import Http404
+from django.shortcuts import render
+from django.views.generic.base import TemplateView
 from django.views.generic.dates import (
     DateDetailView,
     YearArchiveView,
     MonthArchiveView,
     DayArchiveView,
 )
-from django.views.generic.base import TemplateView
+from django.views.generic.list import ListView
+from django.http import HttpResponse
+
 from .models import Entry, Blogmark, Quotation, Tag, load_mixed_objects
-from django.db.models.functions import TruncMonth, TruncYear
-from django.contrib.postgres.search import SearchQuery, SearchRank
-from django.db import models
-import datetime
-from django.http import Http404
-from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
-import time
-from operator import attrgetter
-from itertools import chain
 
 
 class HomeView(TemplateView):
