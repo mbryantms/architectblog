@@ -8,41 +8,81 @@ from django.views.generic.dates import (
 from django.views.generic.base import TemplateView
 from .models import Entry, Blogmark, Quotation, Tag, load_mixed_objects
 from django.db.models.functions import TruncMonth, TruncYear
-from django.db.models import Count
 from django.contrib.postgres.search import SearchQuery, SearchRank
 from django.db import models
 import datetime
 from django.http import Http404
 from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
 import time
+from operator import attrgetter
+from itertools import chain
+
+
+class HomeView(TemplateView):
+    template_name = "flatpages/default.html"
 
 
 class IndexListView(ListView):
     template_name = "blog/index.html"
-    queryset = Entry.objects.order_by("-created_time").prefetch_related("tags")
     context_object_name = "entries"
 
-    def get_context_data(self, **kwargs):
-        context = super(IndexListView, self).get_context_data(**kwargs)
+    def get_queryset(self):
+        queryset = Entry.objects.order_by("-created_time").prefetch_related("tags")
 
+        return queryset
+
+    def get_context_data(self, **kwargs):
+        entries = self.get_queryset()
         blogmarks = Blogmark.objects.order_by("-created_time").prefetch_related("tags")
         quotations = Quotation.objects.order_by("-created_time").prefetch_related(
             "tags"
         )
-        context["blogmarks"] = blogmarks
-        context["quotations"] = quotations
+
+        items = sorted(
+            chain(entries, blogmarks, quotations),
+            key=attrgetter("created_time"),
+            reverse=True,
+        )
+
+        context = super(IndexListView, self).get_context_data(**kwargs)
+        context["items"] = items
+
         return context
 
 
 class EntryDetailView(DateDetailView):
     template_name = "blog/entry_detail.html"
-    model = Entry
+    queryset = Entry.objects.all()
     context_object_name = "entry"
     date_field = "pub_time"
     slug_url_kwarg = "slug"
 
     def get_context_data(self, **kwargs):
         context = super(EntryDetailView, self).get_context_data(**kwargs)
+        return context
+
+
+class LinkDetailView(DateDetailView):
+    template_name = "blog/link_detail.html"
+    queryset = Blogmark.objects.all()
+    context_object_name = "link"
+    date_field = "created_time"
+    slug_url_kwarg = "slug"
+
+    def get_context_data(self, **kwargs):
+        context = super(LinkDetailView, self).get_context_data(**kwargs)
+        return context
+
+
+class QuoteDetailView(DateDetailView):
+    template_name = "blog/quote_detail.html"
+    queryset = Quotation.objects.all()
+    context_object_name = "quote"
+    date_field = "created_time"
+    slug_url_kwarg = "slug"
+
+    def get_context_data(self, **kwargs):
+        context = super(QuoteDetailView, self).get_context_data(**kwargs)
         return context
 
 
@@ -59,27 +99,42 @@ class EntryYearArchiveView(YearArchiveView):
         months = []
         for month in range(1, 12 + 1):
             date = datetime.date(year=year, month=month, day=1)
-            entry_count = Entry.objects.filter(
+            entries = Entry.objects.filter(
                 created_time__year=year, created_time__month=month
-            ).count()
-            quote_count = Quotation.objects.filter(
+            )
+            quotes = Quotation.objects.filter(
                 created_time__year=year, created_time__month=month
-            ).count()
-            month_count = entry_count + quote_count
+            )
+            links = Blogmark.objects.filter(
+                created_time__year=year, created_time__month=month
+            )
+            items = sorted(
+                chain(entries, links, quotes),
+                key=attrgetter("created_time"),
+                reverse=True,
+            )
+            entry_count = entries.count()
+            link_count = links.count()
+            quote_count = quotes.count()
+            month_count = entry_count + link_count + quote_count
+
             if month_count:
                 counts = [
                     ("entry", entry_count),
                     ("quote", quote_count),
+                    ("link", link_count),
                 ]
                 counts_not_0 = [p for p in counts if p[1]]
                 months.append(
                     {
                         "date": date,
-                        "counts": entry_count,
+                        "items": items,
+                        "counts": counts,
                         "counts_not_0": counts_not_0,
                         "entries": list(
                             Entry.objects.filter(
-                                created_time__year=year, created_time__month=month
+                                created_time__year=year,
+                                created_time__month=month,
                             ).order_by("created_time")
                         ),
                     }
@@ -102,19 +157,75 @@ class EntryMonthArchiveView(MonthArchiveView):
         entries = list(
             Entry.objects.filter(
                 created_time__year=year, created_time__month=month
-            ).order_by("created_time")
+            ).order_by("-created_time")
         )
+        blogmarks = list(
+            Blogmark.objects.filter(
+                created_time__year=year, created_time__month=month
+            ).order_by("-created_time")
+        )
+        quotations = list(
+            Quotation.objects.filter(
+                created_time__year=year, created_time__month=month
+            ).order_by("-created_time")
+        )
+
+        # items = sorted(
+        #     chain(entries, blogmarks, quotations),
+        #     key=attrgetter("created_time"),
+        #     reverse=True,
+        # )
+
         context = super(EntryMonthArchiveView, self).get_context_data(**kwargs)
         context["entries"] = entries
+        context["blogmarks"] = blogmarks
+        context["quotations"] = quotations
         return context
 
 
 class EntryDayArchiveView(DayArchiveView):
     template_name = "blog/day_archive.html"
-    queryset = Entry.objects.all()
     date_field = "created_time"
+    model = Entry
     context_object_name = "entry_list"
     allow_empty = True
+
+    def get_context_data(self, **kwargs):
+        year = self.kwargs["year"]
+        month = self.kwargs["month"]
+        day = self.kwargs["day"]
+        entries = list(
+            Entry.objects.filter(
+                created_time__year=year,
+                created_time__month=month,
+                created_time__day=day,
+            ).order_by("created_time")
+        )
+        blogmarks = list(
+            Blogmark.objects.filter(
+                created_time__year=year,
+                created_time__month=month,
+                created_time__day=day,
+            ).order_by("created_time")
+        )
+        quotations = list(
+            Quotation.objects.filter(
+                created_time__year=year,
+                created_time__month=month,
+                created_time__day=day,
+            ).order_by("created_time")
+        )
+
+        items = sorted(
+            chain(entries, blogmarks, quotations),
+            key=attrgetter("created_time"),
+            reverse=True,
+        )
+
+        context = super(EntryDayArchiveView, self).get_context_data(**kwargs)
+        context["items"] = items
+
+        return context
 
 
 # This query gets the IDs of things that match all of the tags

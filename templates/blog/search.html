@@ -2,11 +2,10 @@
 
 {% block extrahead %}
     {% load static %}
-    <link rel="stylesheet" type="text/css" href="{% static "prism.css" %}">
 {% endblock extrahead %}
 
 {% block main %}
-    {% load blog_tags blog_extras %}
+    {% load blog_tags %}
     <h2>{{ title }}</h2>
     <hr>
     <form class="row" action="{{ request.path }}" method="GET">

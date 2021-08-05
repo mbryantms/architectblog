@@ -18,16 +18,19 @@ from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
 from filebrowser.sites import site
+from architectblog.blog.views import HomeView
 
 admin.autodiscover()
 
 urlpatterns = [
     path("admin/filebrowser/", site.urls),
-    path("admin/", admin.site.urls),
+    path("a/", admin.site.urls),
     path("accounts/", include("allauth.urls")),
     path("tinymce/", include("tinymce.urls")),
     path("blog/", include("architectblog.blog.urls")),
     path("users/", include("architectblog.users.urls", namespace="users")),
+    path("", HomeView.as_view(), name="home"),
+    path("pages/", include("django.contrib.flatpages.urls")),
 ]
 
 if settings.DEBUG:

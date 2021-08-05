@@ -3,12 +3,13 @@
     {% if year_headers %}{% ifchanged item.obj.created_time.year %}
         <h3 class="blog-mixed-list-year">{{ item.obj.created_time.year }}</h3>{% endifchanged %}{% endif %}
     {% ifequal item.type "entry" %}
-        <div class="entry segment">
+        <div>
             <h3><a href="{{ item.obj.get_absolute_url }}" rel="bookmark">{{ item.obj.title }}</a></h3>
             <p>
                 {{ item.obj.content|safe|truncatewords:75 }} <span
                     style="font-size: 0.9em">[... <a
                     href="{{ item.obj.get_absolute_url }}">{{ item.obj.content|wordcount }} word{{ item.obj.content|wordcount|pluralize }}</a>]</span>
+
             </p>
             <div class="entryFooter">
                 {% if showdate %}{% entry_footer item.obj %}{% else %}{% entry_footer_no_date item.obj %}{% endif %}
@@ -17,26 +18,61 @@
         <hr><!-- end div.entry -->
     {% endifequal %}
     {% ifequal item.type "blogmark" %}
-        <div class="blogmark segment"><p><a href="{{ item.obj.link_url }}">{{ item.obj.link_title }}</a>
-            {% if item.obj.via_url %} (
-                <a href="{{ item.obj.via_url }}" title="{{ item.obj.via_title }}">via</a>){% endif %}
-            {% if not item.obj.via_url and not item.obj.link_title %}
-                .{% endif %} {{ item.obj.commentary }} <a href="{{ item.obj.get_absolute_url }}"
-                                                                     rel="bookmark">#</a> {% if showdate %}
-                <a href="/blog/{{ item.obj.created_time|date:"Y/m/j/" }}">{{ item.obj.created_time|date:"jS F Y" }}</a>
-                , {% endif %}{{ item.obj.created_time|date:"f A"|lower }}</p>
+        <div class="container">
+            <div class="row">
+                <div class="col-md-1">
+                </div>
+                <div class="col-md-auto w-75">
+                    <div class="card p-3">
+                        <div class="card-body">
+                            <div class="card-title"><h4 style="display: inline"><a
+                                    href="{{ item.obj.link_url }}">{{ item.obj.link_title }}</a></h4>
+                                <small class="text-muted">{% if item.obj.via_url %} (
+                                    <a href="{{ item.obj.via_url }}"
+                                       title="{{ item.obj.via_title }}">via {{ item.obj.via_title|striptags }}</a>
+                                    ){% endif %}</small>
+                            </div>
+                            <div class="card-text">
+                                {{ item.obj.commentary }}
+                                <br>
+                                <br>
+                                <a href="{{ item.obj.get_absolute_url }}"
+                                   rel="bookmark">{{ item.obj.created_time|date }} {{ item.obj.created_time|date:"P" }}</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
         <hr>
     {% endifequal %}
     {% ifequal item.type "quotation" %}
-        <div class="quote segment">
-            <blockquote{% if item.obj.source_url %} cite="{{ item.obj.source_url }}"{% endif %}>
-                <p>{{ item.obj.quotation }}</p></blockquote>
-            <p class="cite">&mdash; {% if item.obj.source_url %}
-                <a href="{{ item.obj.source_url }}">{{ item.obj.source }}</a>{% else %}{{ item.obj.source }}{% endif %}
-                <a href="{{ item.obj.get_absolute_url }}" rel="bookmark">#</a> {% if showdate %}
-                    <a href="/blog/{{ item.obj.created_time|date:"Y/m/j/" }}">{{ item.obj.created_time|date:"jS F Y" }}</a>
-                    , {% endif %}{{ item.obj.created_time|date:"f A"|lower }}</p>
+        <div class="container">
+            <div class="row">
+                <div class="col-md-1">
+                </div>
+                <div class="col-md-auto w-75">
+                    <div class="card p-3">
+                        <div class="card-body">
+                            <blockquote class="blockquote">
+                                <div class="">
+                                    <i class="bi bi-chat-right-quote-fill"></i>
+                                </div>
+                                <p class="font-italic">
+                                    {{ item.obj.quotation }}
+                                </p>
+                                <footer class="blockquote-footer">
+                                    {% if item.obj.source_url %}
+                                        <a href="{{ item.obj.source_url }}">{{ item.obj.source }}</a>{% else %}
+                                        {{ item.obj.source }}{% endif %}
+                                    <a href="{{ item.obj.get_absolute_url }}" rel="bookmark">
+                                        {{ item.obj.created_time|date }} {{ item.obj.created_time|date:"P" }}</a>
+                                </footer>
+                            </blockquote>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
         <hr>
     {% endifequal %}

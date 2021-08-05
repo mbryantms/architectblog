@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+
+{% block extrahead %}
+    {% load static %}
+{% endblock extrahead %}
+
+{% block content %}
+    <main class="home">
+    <br>
+    <br>
+    <div class="container">
+        <div class="row">
+            <div class="col-md-1">
+            </div>
+            <div class="card p-3 w-75">
+                <div class="card-body">
+                    <blockquote class="blockquote">
+                        <div class="">
+                            <i class="bi bi-chat-right-quote-fill"></i>
+                        </div>
+                        <p class="font-italic">
+                            {{ quote.quotation }}
+                        </p>
+                        <footer class="blockquote-footer">
+                            {% if quote.source_url %}
+                                <a href="{{ quote.source_url }}">{{ quote.source }}</a>{% else %}
+                                {{ item.source }}{% endif %}
+                            <a href="{{ quote.get_absolute_url }}" rel="bookmark">#</a>
+                            <a href="/blog/{{ quote.created_time|date:"Y/m/j/" }}">
+                                {{ quote.created_time|date }} {{ quote.created_time|date:"P" }}</a>
+                        </footer>
+                    </blockquote>
+                </div>
+            </div>
+        </div>
+    </div>
+    <br>
+    <div class="small">TAGS</div>
+    {% include "_tags.html" with obj=quote %}
+    <br>
+    <br>
+
+
+
+{% endblock content %}
+{% block sidebar %}
+
+    <div>
+        <h2>
+            <span>Elsewhere</span>
+        </h2>
+    </div> <!-- elsewhere -->
+    <div class="readmore">
+        <a href="#">Elsewhere archive &rarr;</a>
+    </div>
+
+    </main>
+{% endblock sidebar %}

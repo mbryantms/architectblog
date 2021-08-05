@@ -2,16 +2,13 @@
 
 {% block extrahead %}
     {% load static %}
-    <link rel="stylesheet" type="text/css" href="{% static "prism.css" %}">
-    <script src="{% static "prism.js" %}"></script>
 {% endblock extrahead %}
 
 {% block content %}
     <main class="home">
 
     <h1>{{ entry.title }}</h1>
-    <div class="fs-6">{{ entry.created_time| date }}
-        {{ entry.created_time| date:"P" }}</div>
+    {% include "_byline.html" with obj=entry %}
     <p>{{ entry.content|safe }}</p>
     <br>
     <div class="small">TAGS</div>

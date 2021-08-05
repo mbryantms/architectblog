@@ -1,0 +1,3 @@
+<div class="fs-6">posted by {{ obj.author|capfirst }} &nbsp; <a
+        href="/blog/{{ obj.created_time| date:"Y" }}/{{ obj.created_time| date:"m" }}/">{{ obj.created_time| date }}</a>
+    <i class="bi bi-clock"></i><a href="{{ obj.get_absolute_url }}"> {{ obj.created_time| date:"P" }}</a></div>

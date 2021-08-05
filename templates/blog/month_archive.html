@@ -2,17 +2,99 @@
 
 {% block extrahead %}
     {% load static %}
-    <link rel="stylesheet" type="text/css" href="{% static "prism.css" %}">
 {% endblock extrahead %}
 
 {% block content %}
     <main class="home">
     <h2>Archive for {{ month|date:"F Y" }}</h2>
     <hr>
-    <ul>
-        {% for entry in entries %}
-            <li>{{ entry.created_time|date:"jS"}}: <a href="{{ entry.get_absolute_url }}">{{ entry.title }}</a></li>
+    {% load blog_tags %}
+    <h3>Blog entries</h3>
+    {% for item in entries %}
+        <ul>
+            <li>{{ item.created_time|date:"M jS" }}: <a href="{{ item.get_absolute_url }}">{{ item.title }} <span
+                    style="font-size: 0.9em">[...{{ item.content|wordcount }} word{{ item.content|wordcount|pluralize }}]</span></a>
+            </li>
+        </ul>
+    {% endfor %}
+    <hr>
+    <h3>Links</h3>
+    {% if blogmarks %}
+        {% for item in blogmarks %}
+            {% if year_headers %}{% ifchanged item.created_time.year %}
+                <h3 class="blog-mixed-list-year">{{ item.created_time.year }}</h3>{% endifchanged %}{% endif %}
+            <div class="container">
+                <div class="row">
+                    <div class="col-md-1">
+                    </div>
+                    <div class="col-md-auto w-75">
+                        <div class="card p-3">
+                            <div class="card-body">
+                                <div class="card-title"><h4 style="display: inline"><a
+                                        href="{{ item.link_url }}">{{ item.link_title }}</a></h4>
+                                    <small class="text-muted">{% if item.via_url %} (
+                                        <a href="{{ item.via_url }}"
+                                           title="{{ item.via_title }}">via {{ item.via_title|striptags }}</a>
+                                        ){% endif %}</small>
+                                </div>
+                                <div class="card-text">
+                                    {{ item.commentary }}
+                                    <br>
+                                    <br>
+                                    <a href="{{ item.get_absolute_url }}"
+                                       rel="bookmark">{{ item.created_time|date }} {{ item.created_time|date:"P" }}</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <br>
+            <hr>
         {% endfor %}
+    {% else %}
+        <strong>No links for {{ month|date:"F Y" }}</strong>
+        <hr>
+    {% endif %}
+    <h3>Quotes</h3>
+    {% if quotations %}
+        {% for item in quotations %}
+            <div class="container">
+                <div class="row">
+                    <div class="col-md-1">
+                    </div>
+                    <div class="col-md-auto w-75">
+                        <div class="card p-3">
+                            <div class="card-body">
+                                <blockquote class="blockquote">
+                                    <div class="">
+                                        <i class="bi bi-chat-right-quote-fill"></i>
+                                    </div>
+                                    <p class="font-italic">
+                                        {{ item.quotation }}
+                                    </p>
+                                    <footer class="blockquote-footer">
+                                        {% if item.source_url %}
+                                            <a href="{{ item.source_url }}">{{ item.source }}</a>{% else %}
+                                            {{ item.source }}{% endif %}
+                                        <a href="{{ item.get_absolute_url }}" rel="bookmark">#
+
+                                            {{ item.created_time|date }} {{ item.created_time|date:"P" }}</a>
+                                    </footer>
+                                </blockquote>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <br>
+            <hr>
+        {% endfor %}
+    {% else %}
+        <strong>No quotes for {{ month|date:"F Y" }}</strong>
+        <hr>
+    {% endif %}
+
 
 
 

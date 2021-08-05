@@ -1,9 +1,10 @@
 {% if page.paginator.num_pages > 1 %} {% load blog_tags %}
     <nav>
+        {% if page_total %}
+            <strong>{{ page_total }} result{{ page_total|pluralize }} in {{ duration|floatformat:"2" }} seconds</strong>
+            <hr>
+        {% endif %}
         <ul class="pagination pagination-sm justify-content-center">
-            {% if page_total %}
-                <strong>{{ page_total }} result{{ page_total|pluralize }}</strong>
-            {% endif %}
             {% if page.has_previous %}
                 <li class="page-item"><a class="page-link" href="{% page_href 1 %}">&laquo;&laquo;</a></li>
                 <li class="page-item"><a class="page-link" href="{% page_href page.previous_page_number %}">
@@ -24,8 +25,7 @@
     </nav>
 {% else %}
     {% if page_total %}
-        <div class="pagination">
-            <strong>{{ page_total }} result{{ page_total|pluralize }}</strong>
-        </div>
+        <strong>{{ page_total }} result{{ page_total|pluralize }} in {{ duration|floatformat:"2" }} seconds</strong>
+        <hr>
     {% endif %}
 {% endif %}

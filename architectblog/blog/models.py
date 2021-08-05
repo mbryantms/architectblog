@@ -213,6 +213,17 @@ class Blogmark(BaseModel):
         else:
             return "%d words" % count
 
+    def get_absolute_url(self):
+        return reverse(
+            "blog:link_detail",
+            kwargs={
+                "slug": self.slug,
+                "year": self.created_time.year,
+                "month": self.created_time.strftime("%m"),
+                "day": self.created_time.day,
+            },
+        )
+
 
 class Quotation(BaseModel):
     quotation = models.TextField()
@@ -220,10 +231,6 @@ class Quotation(BaseModel):
     source_url = models.URLField(blank=True, null=True)
 
     is_quotation = True
-
-    def title(self):
-        """Mainly a convenience for the comments RSS feed"""
-        return "A quote from %s" % escape(self.source)
 
     def index_components(self):
         return {
@@ -234,6 +241,17 @@ class Quotation(BaseModel):
 
     def __str__(self):
         return self.quotation
+
+    def get_absolute_url(self):
+        return reverse(
+            "blog:quote_detail",
+            kwargs={
+                "slug": self.slug,
+                "year": self.created_time.year,
+                "month": self.created_time.strftime("%m"),
+                "day": self.created_time.day,
+            },
+        )
 
 
 def load_mixed_objects(dicts):

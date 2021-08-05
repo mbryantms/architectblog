@@ -1,9 +1,7 @@
 {% extends "base_2col.html" %}
-{% load blog_extras %}
 
 {% block extrahead %}
     {% load static %}
-    <link rel="stylesheet" type="text/css" href="{% static "prism.css" %}">
 {% endblock extrahead %}
 
 {% block main %}
@@ -25,11 +23,14 @@
                 {% endfor %}
 
             </p>
-            {% if month.entries %}
+            {% if month.items %}
                 <ul>
-                {% for entry in month.entries %}
+                {% for entry in month.items %}
                     <li>
-                        <div><a href="{{ entry.get_absolute_url }}">{{ entry.title }}</a></div>
+                        <div><a href="{{ entry.get_absolute_url }}">
+                            {% if entry.title %}{{ entry.title }}{% elif entry.link_title %}
+                                <strong>Link:</strong> {{ entry.link_title }}{% else %} <strong>Quote:</strong>
+                                {{ entry.source }}{% endif %} </a></div>
                     </li>
                 {% endfor %}
             {% endif %}
@@ -54,6 +55,9 @@
     </div> <!-- elsewhere -->
     <div class="readmore">
         <a href="#">Elsewhere archive &rarr;</a>
+
+        <p>{% for year in years_with_content %}<a href="/{{ year|date:"Y" }}/">{{ year|date:"Y" }}</a>
+            {% if not forloop.last %} / {% endif %}{% endfor %}</p>
     </div>
 
 {% endblock sidebar %}

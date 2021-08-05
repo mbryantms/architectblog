@@ -2,7 +2,6 @@
 
 {% block extrahead %}
     {% load static %}
-    <link rel="stylesheet" type="text/css" href="{% static "prism.css" %}">
 {% endblock extrahead %}
 
 {% block  main %}
@@ -12,41 +11,78 @@
         {% if 1 is 1 %}{% ifchanged item.obj.created_time.year %}
             <h3><strong>{{ item.obj.created_time.year }}</strong></h3>{% endifchanged %}{% endif %}
         {% ifequal item.type "entry" %}
-            <div class="entry segment">
+            <div>
                 <h3><a href="{{ item.obj.get_absolute_url }}" rel="bookmark">{{ item.obj.title }}</a></h3>
+                {% include "_byline.html" with obj=item.obj %}
                 <p>
                     {{ item.obj.content|safe|truncatewords:75 }} <span
                         style="font-size: 0.9em">[... <a
                         href="{{ item.obj.get_absolute_url }}">{{ item.obj.content|wordcount }} word{{ item.obj.content|wordcount|pluralize }}</a>]</span>
                 </p>
-                <div class="entryFooter">
-                    {% entry_footer item.obj %}
-                </div>
-            </div> <!-- end div.entry -->
+                <br>
+            </div>
             <hr>
         {% endifequal %}
         {% ifequal item.type "blogmark" %}
-            <div class="blogmark segment"><p><a href="{{ item.obj.link_url }}">{{ item.obj.link_title }}</a>
-                {% if item.obj.via_url %} (
-                    <a href="{{ item.obj.via_url }}" title="{{ item.obj.via_title }}">via</a>){% endif %}
-                {% if not item.obj.via_url and not item.obj.link_title %}
-                    .{% endif %} {{ item.obj.commentary }} <a href="{{ item.obj.get_absolute_url }}"
-                                                              rel="bookmark">#</a>
-                <a href="blog/{{ item.obj.created_time|date:"Y/m/j/" }}">{{ item.obj.created_time|date:"jS F Y" }}</a>
-                , {{ item.obj.created_time|date:"f A"|lower }}</p>
+            <div class="container">
+                <div class="row">
+                    <div class="col-md-1">
+                    </div>
+                    <div class="col-md-auto w-75">
+                        <div class="card p-3">
+                            <div class="card-body">
+                                <div class="card-title"><h4 style="display: inline"><a
+                                        href="{{ item.obj.link_url }}">{{ item.obj.link_title }}</a></h4>
+                                    <small class="text-muted">{% if item.obj.via_url %} (
+                                        <a href="{{ item.obj.via_url }}"
+                                           title="{{ item.obj.via_title }}">via {{ item.obj.via_title|striptags }}</a>
+                                        ){% endif %}</small>
+                                </div>
+                                <div class="card-text">
+                                    {{ item.obj.commentary }}
+                                    <br>
+                                    <br>
+                                    <a href="{{ item.obj.get_absolute_url }}"
+                                       rel="bookmark">{{ item.obj.created_time|date }} {{ item.obj.created_time|date:"P" }}</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
             <hr>
         {% endifequal %}
         {% ifequal item.type "quotation" %}
-            <div class="quote segment">
-                <blockquote{% if item.obj.source_url %} cite="{{ item.obj.source_url }}"{% endif %}>
-                    <p>{{ item.obj.quotation }}</p></blockquote>
-                <p class="cite">&mdash; {% if item.obj.source_url %}
-                    <a href="{{ item.obj.source_url }}">{{ item.obj.source }}</a>{% else %}
-                    {{ item.obj.source }}{% endif %} <a href="{{ item.obj.get_absolute_url }}" rel="bookmark">#</a>
-                    <a href="blog/{{ item.obj.created_time|date:"Y/m/j/" }}">{{ item.obj.created_time|date:"jS F Y" }}</a>
-                    , {{ item.obj.created_time|date:"f A"|lower }}</p>
+            <div class="container">
+                <div class="row">
+                    <div class="col-md-1">
+                    </div>
+                    <div class="col-md-auto w-75">
+                        <div class="card p-3">
+                            <div class="card-body">
+                                <blockquote class="blockquote">
+                                    <div class="">
+                                        <i class="bi bi-chat-right-quote-fill"></i>
+                                    </div>
+                                    <p class="font-italic">
+                                        {{ item.obj.quotation }}
+                                    </p>
+                                    <footer class="blockquote-footer">
+                                        {% if item.source_url %}
+                                            <a href="{{ item.obj.source_url }}">{{ item.obj.source }}</a>{% else %}
+                                            {{ item.obj.source }}{% endif %}
+                                        <a href="{{ item.obj.get_absolute_url }}" rel="bookmark">#
+                                            {{ item.obj.created_time|date }} {{ item.obj.created_time|date:"P" }}</a>
+                                    </footer>
+                                </blockquote>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
+
+
+
             <hr>
         {% endifequal %}
     {% endfor %}
@@ -59,6 +95,8 @@
     <div>
         {% if only_one_tag and tag.get_related_tags %}
             <h3>Related tags</h3>
+            <p class="fst-italic" style="font-size: 0.9em">You can string up to three tags together with '+' in the URL for multiple tag
+                searches: /tag1+tag2</p>
             {% for related_tag in tag.get_related_tags %}
                 <a class="btn btn-sm btn-secondary" href="{{ related_tag.get_absolute_url }}" rel="tag">
                     {{ related_tag }}

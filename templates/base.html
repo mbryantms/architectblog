@@ -1,6 +1,6 @@
 {% load static i18n %}
 <!doctype html>
-<html lang="en">
+<html lang="en" class="h-100">
 <head>
     <meta charset="utf-8">
     <meta http-equiv="x-ua-compatible" content="ie=edge">
@@ -14,13 +14,13 @@
     {% block css %}
         <!-- CSS only -->
         <link href="{% static "custom.css" %}" rel="stylesheet">
+        <link rel="stylesheet" type="text/css" href="{% static "prism.css" %}">
         <link href="{% static "bootstrap-icons/font/bootstrap-icons.css" %}" rel="stylesheet">
         <!-- Your stuff: Third-party CSS libraries go here -->
         <link rel="preconnect" href="https://fonts.gstatic.com">
-        <link href="https://fonts.googleapis.com/css2?family=Open+Sans&family=Roboto:wght@300&display=swap"
+        <link href="https://fonts.googleapis.com/css2?family=Open+Sans&family=Roboto:ital,wght@0,300;1,900&display=swap"
               rel="stylesheet">
         <!-- Custom styles for this template -->
-        <!-- <link href="{% static "homepage.css" %}" rel="stylesheet"> -->
     {% endblock %}
 
     {% block javascript %}
@@ -32,7 +32,7 @@
 
 </head>
 
-<body>
+<body class="d-flex flex-column h-100">
 
 <div class="mb-1">
     <header class="p-3 mb-3 border-bottom">
@@ -101,7 +101,7 @@
     {% endif %}
 
     {% block content %}
-        <p>Use this document as a way to quick start any new project.</p>
+        <p>Standard template filler text</p>
     {% endblock content %}
 
 </div> <!-- /container -->
@@ -110,6 +110,10 @@
 
 {% block inline_javascript %}
     {# Script tags with only code, no src (defer by default) #}
+    <script src="{% static "prism.js" %}"></script>
 {% endblock inline_javascript %}
 </body>
+
+{% include "_footer.html" %}
+
 </html>

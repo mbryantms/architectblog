@@ -1,4 +1,4 @@
-<a href="{{ entry.get_absolute_url }}"
+posted by {{ entry.author|capfirst }} / <a href="{{ entry.get_absolute_url }}"
    title="Permalink for &quot;{{ entry.title }}&quot;">{{ entry.created_time|date:"f A"|lower }}</a>{% if showdate %} /
     <a href="/blog/{{ entry.created_time|date:"Y/m/j/" }}">{{ entry.created_time|date:"jS F Y" }}</a>{% endif %}
 {% if entry.tags.count %} /

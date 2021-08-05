@@ -2,25 +2,102 @@
 
 {% block extrahead %}
     {% load static %}
-    <link rel="stylesheet" type="text/css" href="{% static "prism.css" %}">
 {% endblock extrahead %}
 
 {% block content %}
+    {% load blog_tags %}
     <main class="home">
     <h2>Articles for {{ day|date:"F j Y" }}</h2>
     <hr>
-    <ul>
-        {% for date in date_list %}
-            <li><a href="/{{ year|date:"Y" }}/{{ date|date:"m" }}/">{{ date|date:"F" }}</a></li>
-        {% endfor %}
-        {% for entry in entry_list %}
-            </ul>
-            <h3><a href="{{ entry.get_absolute_url }}">{{ entry.title }}</a></h3>
-            <p>{{ entry.content|safe|truncatewords_html:100 }}</p>
-            <hr>
-        {% endfor %}
 
-    <br><br><br>
+    {% for item in items %}
+        {% if year_headers %}{% ifchanged item.obj.created_time.year %}
+            <h3 class="blog-mixed-list-year">{{ item.obj.created_time.year }}</h3>{% endifchanged %}{% endif %}
+        {% if item.is_blogmark is True %}
+            <span class="badge rounded-pill bg-light text-dark">Link</span>
+            <br>
+            <br>
+            <div class="container">
+                <div class="row">
+                    <div class="col-md-1">
+                    </div>
+                    <div class="col-md-auto w-75">
+                        <div class="card p-3">
+                            <div class="card-body">
+                                <div class="card-title"><h4 style="display: inline"><a
+                                        href="{{ item.link_url }}">{{ item.link_title }}</a></h4>
+                                    <small class="text-muted">{% if item.via_url %} (
+                                        <a href="{{ item.via_url }}"
+                                           title="{{ item.via_title }}">via {{ item.via_title|striptags }}</a>
+                                        ){% endif %}</small>
+                                </div>
+                                <div class="card-text">
+                                    {{ item.commentary }}
+                                    <br>
+                                    <br>
+                                    <a href="{{ item.get_absolute_url }}"
+                                       rel="bookmark">{{ item.created_time|date }} {{ item.created_time|date:"P" }}</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <br>
+            <div class="small">TAGS</div>
+            {% include "_tags.html" with obj=item %}
+            <hr>
+        {% endif %}
+        {% if item.is_quotation is True %}
+            <span class="badge rounded-pill bg-light text-dark">Quotation</span>
+            <br>
+            <br>
+            <div class="container">
+                <div class="row">
+                    <div class="col-md-1">
+                    </div>
+                    <div class="col-md-auto w-75">
+                        <div class="card p-3">
+                            <div class="card-body">
+                                <blockquote class="blockquote">
+                                    <div class="">
+                                        <i class="bi bi-chat-right-quote-fill"></i>
+                                    </div>
+                                    <p class="font-italic">
+                                        {{ item.quotation }}
+                                    </p>
+                                    <footer class="blockquote-footer">
+                                        {% if item.source_url %}
+                                            <a href="{{ item.source_url }}">{{ item.source }}</a>{% else %}
+                                            {{ item.source }}{% endif %}
+                                        <a href="{{ item.get_absolute_url }}" rel="bookmark">
+                                            {{ item.created_time|date }} {{ item.created_time|date:"P" }}</a>
+                                    </footer>
+                                </blockquote>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <br>
+            <div class="small">TAGS</div>
+            {% include "_tags.html" with obj=item %}
+            <hr>
+        {% endif %}
+        {% if item.content %}
+            <div class=>
+                <h1><a href="{{ item.get_absolute_url }}" rel="bookmark">{{ item.title }}</a></h1>
+                {% include "_byline.html" with obj=item %}
+                <p>
+                    {{ item.content|safe }}
+                </p>
+                <br>
+                <div class="small">TAGS</div>
+                {% include "_tags.html" with obj=item %}
+            </div>
+            <hr><!-- end div.entry -->
+        {% endif %}
+    {% endfor %}
 
 {% endblock content %}
 {% block sidebar %}

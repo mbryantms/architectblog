@@ -7,6 +7,8 @@ from .views import (
     EntryDayArchiveView,
     EntrySearchView,
     TagArchiveView,
+    LinkDetailView,
+    QuoteDetailView,
 )
 
 app_name = "blog"
@@ -30,4 +32,14 @@ urlpatterns = [
     ),
     path("search/", EntrySearchView.as_view(), name="search"),
     path("tags/<tags>/", TagArchiveView.as_view(), name="tag_detail"),
+    path(
+        "links/<int:year>/<int:month>/<int:day>/<str:slug>/",
+        LinkDetailView.as_view(month_format="%m"),
+        name="link_detail",
+    ),
+    path(
+        "quotes/<int:year>/<int:month>/<int:day>/<str:slug>/",
+        QuoteDetailView.as_view(month_format="%m"),
+        name="quote_detail",
+    ),
 ]

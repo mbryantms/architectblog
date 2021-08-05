@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+
+{% block extrahead %}
+    {% load static %}
+{% endblock extrahead %}
+
+{% block content %}
+    <main class="home">
+    <br>
+    <br>
+    <div class="container">
+        <div class="row">
+            <div class="col-md-1">
+            </div>
+            <div class="col-md-auto w-75">
+                <div class="card p-3">
+                    <div class="card-body">
+                        <div class="card-title"><h4 style="display: inline"><a
+                                href="{{ link.link_url }}">{{ link.link_title }}</a></h4>
+                            <small class="text-muted">{% if link.via_url %} (
+                                <a href="{{ link.via_url }}"
+                                   title="{{ link.via_title }}">via {{ link.via_title|striptags }}</a>
+                                ){% endif %}</small>
+                        </div>
+                        <div class="card-text">
+                            {{ link.commentary }}
+                            <br>
+                            <br>
+                            <a href="{{ link.get_absolute_url }}"
+                               rel="bookmark">{{ link.created_time|date }} {{ link.created_time|date:"P" }}</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <br>
+    <div class="small">TAGS</div>
+    {% include "_tags.html" with obj=link %}
+    <br>
+    <br>
+
+
+
+{% endblock content %}
+{% block sidebar %}
+
+    <div>
+        <h2>
+            <span>Elsewhere</span>
+        </h2>
+    </div> <!-- elsewhere -->
+    <div class="readmore">
+        <a href="#">Elsewhere archive &rarr;</a>
+    </div>
+
+    </main>
+{% endblock sidebar %}
