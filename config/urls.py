@@ -24,7 +24,7 @@ admin.autodiscover()
 
 urlpatterns = [
     path("admin/filebrowser/", site.urls),
-    path("a/", admin.site.urls),
+    path("admin/", admin.site.urls),
     path("accounts/", include("allauth.urls")),
     path("tinymce/", include("tinymce.urls")),
     path("blog/", include("architectblog.blog.urls")),
