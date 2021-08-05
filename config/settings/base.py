@@ -23,7 +23,8 @@ env.read_env(str(ROOT_DIR / ".env"))
 # https://docs.djangoproject.com/en/dev/ref/settings/#debug
 #
 # False if not in os.environ
-DEBUG = env.bool("DJANGO_DEBUG", False)
+# DEBUG = env.bool("DJANGO_DEBUG", False)
+DEBUG = False
 
 # https://docs.djangoproject.com/en/dev/ref/settings/#language-code
 LANGUAGE_CODE = "en-us"
@@ -176,16 +177,12 @@ TEMPLATES = [
                 "django.contrib.auth.context_processors.auth",
                 "django.template.context_processors.i18n",
                 "django.template.context_processors.media",
-                "django.template.context_processors.static",
                 "django.template.context_processors.tz",
                 "django.contrib.messages.context_processors.messages",
             ],
         },
     },
 ]
-
-# django-allauth
-# ------------------------------------------------------------------------------
 
 # EMAIL
 # ------------------------------------------------------------------------------
