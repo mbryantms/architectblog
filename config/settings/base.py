@@ -152,14 +152,6 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 
-# MEDIA
-# ------------------------------------------------------------------------------
-# https://docs.djangoproject.com/en/dev/ref/settings/#media-root
-MEDIA_ROOT = path.join(APPS_DIR / "media/")
-
-# https://docs.djangoproject.com/en/dev/ref/settings/#media-url
-MEDIA_URL = "/media/"
-
 # TEMPLATES
 # ------------------------------------------------------------------------------
 # https://docs.djangoproject.com/en/dev/ref/settings/#templates
@@ -208,7 +200,7 @@ EMAIL_TIMEOUT = 5
 # Django Admin URL.
 ADMIN_URL = "a/"
 # https://docs.djangoproject.com/en/dev/ref/settings/#admins
-ADMINS = [("""matthew""", "mbryantms@gmail.com")]
+ADMINS = []
 # https://docs.djangoproject.com/en/dev/ref/settings/#managers
 MANAGERS = ADMINS
 
