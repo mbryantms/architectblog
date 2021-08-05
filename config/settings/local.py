@@ -47,7 +47,7 @@ INTERNAL_IPS = ["127.0.0.1", "10.0.2.2"]
 # https://docs.djangoproject.com/en/dev/ref/settings/#static-root
 STATIC_ROOT = str(ROOT_DIR / "staticfiles")
 # https://docs.djangoproject.com/en/dev/ref/contrib/staticfiles/#std:setting-STATICFILES_DIRS
-STATICFILES_DIRS = [str(APPS_DIR / "static"), str(APPS_DIR / "node_modules")]
+STATICFILES_DIRS = [str(APPS_DIR / "static"), str(ROOT_DIR / "node_modules")]
 # https://docs.djangoproject.com/en/dev/ref/contrib/staticfiles/#staticfiles-finders
 STATICFILES_FINDERS = [
     "django.contrib.staticfiles.finders.FileSystemFinder",

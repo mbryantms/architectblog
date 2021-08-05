@@ -13,7 +13,7 @@ ALLOWED_HOSTS = ["*", "127.0.0.1:7000", "127.0.0.1"]
 # https://docs.djangoproject.com/en/dev/ref/settings/#static-root
 STATIC_ROOT = path.join(ROOT_DIR / "staticfiles")
 # https://docs.djangoproject.com/en/dev/ref/contrib/staticfiles/#std:setting-STATICFILES_DIRS
-STATICFILES_DIRS = [str(APPS_DIR / "static")]
+STATICFILES_DIRS = [str(APPS_DIR / "static"), str(ROOT_DIR / "node_modules")]
 # https://docs.djangoproject.com/en/dev/ref/settings/#static-url
 
 # https://docs.djangoproject.com/en/dev/ref/contrib/staticfiles/#staticfiles-finders
