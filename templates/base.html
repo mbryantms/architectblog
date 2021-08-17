@@ -34,97 +34,65 @@
 
 <body class="d-flex flex-column h-100">
 
-<div class="mb-6">
-    <header>
-        <nav class="navbar navbar-expand-lg navbar-light bg-light container">
-            <button class="navbar-toggler" type="buttom" data-bs-toggle="collapse" data-bs-target="#navbarToggler"
-                    aria-controls="navbarToggler" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="d-flex flex-wrap align-items-center justify-content-center justify-content-lg-start collapse navbar-collapse"
-                 id="navbarToggler">
-                <ul class="nav navbar-nav col-12 col-lg-auto me-lg-auto mb-2 justify-content-center mb-md-0">
-                    <li class="nav-item"><a href="{% url 'home' %}" class="nav-link px-2 link-dark">Home</a></li>
+<div class="mb-1">
+    <header class="p-3 mb-3 border-bottom">
+        <div class="container">
+            <div class="d-flex flex-wrap align-items-center justify-content-center justify-content-lg-start">
+                <a href="/" class="d-flex align-items-center mb-2 mb-lg-0 text-dark text-decoration-none">
+                    <!-- insert logo here -->
+                </a>
+
+                <ul class="nav col-12 col-lg-auto me-lg-auto mb-2 justify-content-center mb-md-0">
+                    <li><a href="{% url 'home' %}" class="nav-link px-2 link-dark">Home</a></li>
                     {% if request.user.is_authenticated %}
-                        <li class="navitem"><a href="{% url 'blog:blog_index' %}"
-                                               class="nav-link px-2 link-dark">{% trans "Blog" %}</a>
+                        <li><a href="{% url 'blog:blog_index' %}"
+                               class="nav-link px-2 link-dark">{% trans "Blog" %}</a>
                         </li>
-                        <li class="nav-item"><a href="https://wiki.mbcode.io"
-                                                class="nav-link px-2 link-dark">{% trans "Wiki" %}</a></li>
+                        <li><a href="https://wiki.mbcode.io"
+                               class="nav-link px-2 link-dark">{% trans "Wiki" %}</a></li>
                     {% else %}
                         <li class="nav-item"><a href="{% url 'blog:blog_index' %}"
                                                 class="nav-link px-2 link-dark">{% trans "Blog" %}</a></li>
                         <li class="nav-item"><a href="#" class="nav-link px-2 link-dark">Archive</a></li>
                     {% endif %}
                 </ul>
-                <form class="col-12 col-sm-auto mb-3 mb-lg-0 me-lg-3" action="{% url 'blog:search' %}" method="GET">
+                <form class="col-12 col-sm-auto mb-3 mb-lg-0 me-lg-3" action="{% url 'blog:search' %}"
+                      method="GET">
                     <input type="search" class="form-control" placeholder="Search" name="q" value="{{ q }}">
                 </form>
                 <div class="dropdown text-end">
-                    <a href="#" class="d-block link-dark text-decoration-none dropdown-toggle" id="dropdownUser1"
+                    <a href="#" class="d-block link-dark text-decoration-none dropdown-toggle"
+                       id="dropdownUser1"
                        data-bs-toggle="dropdown" aria-expanded="false">
-                        <img src="https://github.com/mdo.png" alt="mdo" width="32" height="32" class="rounded-circle">
+                        <img src="https://github.com/mdo.png" alt="mdo" width="32" height="32"
+                             class="rounded-circle">
                     </a>
                     <ul class="dropdown-menu text-small" aria-labelledby="dropdownUser1" style="">
-
                         {% if not request.user.is_authenticated %}
-                            <li><a class="dropdown-item" href="{% url 'account_signup' %}">{% trans "Sign Up" %}</a>
+                            <li><a class="dropdown-item"
+                                   href="{% url 'account_signup' %}">{% trans "Sign Up" %}</a>
                             </li>
-                            <li><a class="dropdown-item" href="{% url 'account_login' %}">{% trans "Log In" %}</a></li>
+                            <li><a class="dropdown-item"
+                                   href="{% url 'account_login' %}">{% trans "Log In" %}</a></li>
                         {% endif %}
                         {% if request.user.is_authenticated %}
                             <li><a class="dropdown-item"
-                                   href="{% url 'users:detail' request.user.username %}">{% trans "Profile" %}</a></li>
+                                   href="{% url 'users:detail' request.user.username %}">{% trans "Profile" %}</a>
+                            </li>
                             <li>
                                 <hr class="dropdown-divider">
                             </li>
                             <li><a class="dropdown-item"
-                                   href="{% url 'account_change_password' %}">{% trans "Change Password" %}</a></li>
-                            <li><a class="dropdown-item" href="{% url 'account_logout' %}">{% trans "Log Out" %}</a>
+                                   href="{% url 'account_change_password' %}">{% trans "Change Password" %}</a>
+                            </li>
+                            <li><a class="dropdown-item"
+                                   href="{% url 'account_logout' %}">{% trans "Log Out" %}</a>
                             </li>
                         {% endif %}
                     </ul>
                 </div>
             </div>
-        </nav>
-
-
-        <nav class="navbar navbar-expand-lg navbar-light bg-light" aria-label="Eighth navbar example">
-            <div class="container">
-                <a class="navbar-brand" href="#">Container</a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
-                        data-bs-target="#navbarsExample07" aria-controls="navbarsExample07" aria-expanded="false"
-                        aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-
-                <div class="collapse navbar-collapse" id="navbarsExample07">
-                    <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                        <li class="nav-item">
-                            <a class="nav-link active" aria-current="page" href="#">Home</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="#">Link</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link disabled" href="#" tabindex="-1" aria-disabled="true">Disabled</a>
-                        </li>
-                        <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" href="#" id="dropdown07" data-bs-toggle="dropdown"
-                               aria-expanded="false">Dropdown</a>
-                            <ul class="dropdown-menu" aria-labelledby="dropdown07">
-                                <li><a class="dropdown-item" href="#">Action</a></li>
-                                <li><a class="dropdown-item" href="#">Another action</a></li>
-                                <li><a class="dropdown-item" href="#">Something else here</a></li>
-                            </ul>
-                        </li>
-                    </ul>
-                    <form>
-                        <input class="form-control" type="text" placeholder="Search" aria-label="Search">
-                    </form>
-                </div>
-            </div>
-        </nav>
+        </div>
     </header>
 
 </div>
