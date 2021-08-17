@@ -24,7 +24,7 @@
                         <footer class="blockquote-footer">
                             {% if quote.source_url %}
                                 <a href="{{ quote.source_url }}">{{ quote.source }}</a>{% else %}
-                                {{ item.source }}{% endif %}
+                                {{ quote.source }}{% endif %}
                             <a href="{{ quote.get_absolute_url }}" rel="bookmark">#
                                 {{ quote.created_time|date }} {{ quote.created_time|date:"P" }}</a>
                         </footer>
