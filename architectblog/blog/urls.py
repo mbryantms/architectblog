@@ -9,6 +9,7 @@ from .views import (
     TagArchiveView,
     LinkDetailView,
     QuoteDetailView,
+    ArchiveView,
 )
 
 app_name = "blog"
@@ -41,5 +42,8 @@ urlpatterns = [
         "quotes/<int:year>/<int:month>/<int:day>/<str:slug>/",
         QuoteDetailView.as_view(month_format="%m"),
         name="quote_detail",
+    ),
+    path(
+        "archive/", ArchiveView.as_view(), name="archive_view"
     ),
 ]

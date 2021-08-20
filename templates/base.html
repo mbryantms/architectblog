@@ -33,69 +33,68 @@
 </head>
 
 <body class="d-flex flex-column h-100">
+<nav class="navbar navbar-expand-lg navbar-light border-bottom mb-4 p-3" aria-label="navbarArchitect">
+    <div class="container-lg">
+        <a class="navbar-brand" href="{% url 'home' %}">Architect</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarArchitect"
+                aria-controls="navbarArchitect" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
 
-<div class="mb-1">
-    <header class="p-3 mb-3 border-bottom">
-        <div class="container">
-            <div class="d-flex flex-wrap align-items-center justify-content-center justify-content-lg-start">
-                <a href="/" class="d-flex align-items-center mb-2 mb-lg-0 text-dark text-decoration-none">
-                    <!-- insert logo here -->
+        <div class="collapse navbar-collapse" id="navbarArchitect">
+            <ul class="navbar-nav col-12 col-lg-auto me-lg-auto mb-2 justify-content-center mb-md-0">
+                <li><a href="{% url 'home' %}" class="nav-link px-2 link-dark">Home</a></li>
+                {% if request.user.is_authenticated %}
+                    <li><a href="{% url 'blog:blog_index' %}"
+                           class="nav-link px-2 link-dark">{% trans "Blog" %}</a>
+                    </li>
+                    <li><a href="https://wiki.mbcode.io"
+                           class="nav-link px-2 link-dark">{% trans "Wiki" %}</a></li>
+                {% else %}
+                    <li class="nav-item"><a href="{% url 'blog:blog_index' %}"
+                                            class="nav-link px-2 link-dark">{% trans "Blog" %}</a></li>
+                    <li class="nav-item"><a href="#" class="nav-link px-2 link-dark">Archive</a></li>
+                {% endif %}
+            </ul>
+            <form class="col-12 col-sm-auto mb-3 mb-lg-0 me-lg-3" action="{% url 'blog:search' %}"
+                  method="GET">
+                <input type="search" class="form-control" placeholder="Search" name="q" value="{{ q }}">
+            </form>
+            <div class="dropdown text-end">
+                <a href="{% static "user.png" %}" class="d-block link-dark text-decoration-none dropdown-toggle"
+                   id="dropdownUser1"
+                   data-bs-toggle="dropdown" aria-expanded="false">
+                    <img src="{% static "user.png" %}" alt="user" width="32" height="32"
+                         class="rounded-circle">
                 </a>
-
-                <ul class="nav col-12 col-lg-auto me-lg-auto mb-2 justify-content-center mb-md-0">
-                    <li><a href="{% url 'home' %}" class="nav-link px-2 link-dark">Home</a></li>
-                    {% if request.user.is_authenticated %}
-                        <li><a href="{% url 'blog:blog_index' %}"
-                               class="nav-link px-2 link-dark">{% trans "Blog" %}</a>
+                <ul class="dropdown-menu text-small" aria-labelledby="dropdownUser1" style="">
+                    {% if not request.user.is_authenticated %}
+                        <li><a class="dropdown-item"
+                               href="{% url 'account_signup' %}">{% trans "Sign Up" %}</a>
                         </li>
-                        <li><a href="https://wiki.mbcode.io"
-                               class="nav-link px-2 link-dark">{% trans "Wiki" %}</a></li>
-                    {% else %}
-                        <li class="nav-item"><a href="{% url 'blog:blog_index' %}"
-                                                class="nav-link px-2 link-dark">{% trans "Blog" %}</a></li>
-                        <li class="nav-item"><a href="#" class="nav-link px-2 link-dark">Archive</a></li>
+                        <li><a class="dropdown-item"
+                               href="{% url 'account_login' %}">{% trans "Log In" %}</a></li>
+                    {% endif %}
+                    {% if request.user.is_authenticated %}
+                        <li><a class="dropdown-item"
+                               href="{% url 'users:detail' request.user.username %}">{% trans "Profile" %}</a>
+                        </li>
+                        <li>
+                            <hr class="dropdown-divider">
+                        </li>
+                        <li><a class="dropdown-item"
+                               href="{% url 'account_change_password' %}">{% trans "Change Password" %}</a>
+                        </li>
+                        <li><a class="dropdown-item"
+                               href="{% url 'account_logout' %}">{% trans "Log Out" %}</a>
+                        </li>
                     {% endif %}
                 </ul>
-                <form class="col-12 col-sm-auto mb-3 mb-lg-0 me-lg-3" action="{% url 'blog:search' %}"
-                      method="GET">
-                    <input type="search" class="form-control" placeholder="Search" name="q" value="{{ q }}">
-                </form>
-                <div class="dropdown text-end">
-                    <a href="#" class="d-block link-dark text-decoration-none dropdown-toggle"
-                       id="dropdownUser1"
-                       data-bs-toggle="dropdown" aria-expanded="false">
-                        <img src="https://github.com/mdo.png" alt="mdo" width="32" height="32"
-                             class="rounded-circle">
-                    </a>
-                    <ul class="dropdown-menu text-small" aria-labelledby="dropdownUser1" style="">
-                        {% if not request.user.is_authenticated %}
-                            <li><a class="dropdown-item"
-                                   href="{% url 'account_signup' %}">{% trans "Sign Up" %}</a>
-                            </li>
-                            <li><a class="dropdown-item"
-                                   href="{% url 'account_login' %}">{% trans "Log In" %}</a></li>
-                        {% endif %}
-                        {% if request.user.is_authenticated %}
-                            <li><a class="dropdown-item"
-                                   href="{% url 'users:detail' request.user.username %}">{% trans "Profile" %}</a>
-                            </li>
-                            <li>
-                                <hr class="dropdown-divider">
-                            </li>
-                            <li><a class="dropdown-item"
-                                   href="{% url 'account_change_password' %}">{% trans "Change Password" %}</a>
-                            </li>
-                            <li><a class="dropdown-item"
-                                   href="{% url 'account_logout' %}">{% trans "Log Out" %}</a>
-                            </li>
-                        {% endif %}
-                    </ul>
-                </div>
             </div>
         </div>
-    </header>
+    </div>
+</nav>
 
-</div>
 
 <div class="container text-decoration-none">
 

@@ -512,3 +512,16 @@ class EntrySearchView(ListView):
         context["month"] = selected_month
 
         return context
+
+
+class ArchiveView(TemplateView):
+    template_name = "blog/archive.html"
+    model = Entry
+
+    def get_context_data(self, **kwargs):
+
+        tags = Tag.object.filter()
+
+        context = super(ArchiveView, self).get_context_data(**kwargs)
+
+        return context
