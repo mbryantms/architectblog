@@ -518,10 +518,52 @@ class ArchiveView(TemplateView):
     template_name = "blog/archive.html"
     model = Entry
 
-    def get_context_data(self, **kwargs):
+    def get_context_data(self):
+        for year in range(2021, 2021 + 1):
+            months = []
+            for month in range(1, 12 + 1):
+                date = datetime.date(year=year, month=month, day=1)
+                entries = Entry.objects.filter(
+                    created_time__year=year, created_time__month=month
+                )
+                quotes = Quotation.objects.filter(
+                    created_time__year=year, created_time__month=month
+                )
+                links = Blogmark.objects.filter(
+                    created_time__year=year, created_time__month=month
+                )
+                items = sorted(
+                    chain(entries, links, quotes),
+                    key=attrgetter("created_time"),
+                    reverse=True,
+                )
+                entry_count = entries.count()
+                link_count = links.count()
+                quote_count = quotes.count()
+                month_count = entry_count + link_count + quote_count
 
-        tags = Tag.object.filter()
+                if month_count:
+                    counts = [
+                        ("entry", entry_count),
+                        ("quote", quote_count),
+                        ("link", link_count),
+                    ]
+                    counts_not_0 = [p for p in counts if p[1]]
+                    months.append(
+                        {
+                            "date": date,
+                            "items": items,
+                            "counts": counts,
+                            "counts_not_0": counts_not_0,
+                            "entries": list(
+                                Entry.objects.filter(
+                                    created_time__year=year,
+                                    created_time__month=month,
+                                ).order_by("created_time")
+                            ),
+                        }
+                    )
 
-        context = super(ArchiveView, self).get_context_data(**kwargs)
-
+        context = super(ArchiveView, self).get_context_data()
+        context["months"] = months
         return context

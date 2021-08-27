@@ -27,9 +27,9 @@ urlpatterns = [
     path("admin/", admin.site.urls),
     path("accounts/", include("allauth.urls")),
     path("tinymce/", include("tinymce.urls")),
-    path("blog/", include("architectblog.blog.urls")),
+    path("", include("architectblog.blog.urls")),
     path("users/", include("architectblog.users.urls", namespace="users")),
-    path("", HomeView.as_view(), name="home"),
+    # path("", HomeView.as_view(), name="home"),
     path("pages/", include("django.contrib.flatpages.urls")),
 ]
 

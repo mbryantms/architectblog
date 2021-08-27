@@ -14,7 +14,7 @@ from .views import (
 
 app_name = "blog"
 urlpatterns = [
-    path("", IndexListView.as_view(), name="blog_index"),
+    path("", IndexListView.as_view(), name="home"),
     path(
         "<int:year>/<int:month>/<int:day>/<str:slug>/",
         EntryDetailView.as_view(month_format="%m"),
@@ -43,7 +43,5 @@ urlpatterns = [
         QuoteDetailView.as_view(month_format="%m"),
         name="quote_detail",
     ),
-    path(
-        "archive/", ArchiveView.as_view(), name="archive_view"
-    ),
+    path("archive/", ArchiveView.as_view(), name="archive_view"),
 ]

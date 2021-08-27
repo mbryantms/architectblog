@@ -35,7 +35,7 @@
 <body class="d-flex flex-column h-100">
 <nav class="navbar navbar-expand-lg navbar-light border-bottom mb-4 p-3" aria-label="navbarArchitect">
     <div class="container-lg">
-        <a class="navbar-brand" href="{% url 'home' %}">Architect</a>
+        <a class="navbar-brand" href="{% url 'blog:home' %}">Architect</a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarArchitect"
                 aria-controls="navbarArchitect" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
@@ -43,15 +43,15 @@
 
         <div class="collapse navbar-collapse" id="navbarArchitect">
             <ul class="navbar-nav col-12 col-lg-auto me-lg-auto mb-2 justify-content-center mb-md-0">
-                <li><a href="{% url 'home' %}" class="nav-link px-2 link-dark">Home</a></li>
+                <li><a href="{% url 'blog:home' %}" class="nav-link px-2 link-dark">Home</a></li>
                 {% if request.user.is_authenticated %}
-                    <li><a href="{% url 'blog:blog_index' %}"
+                    <li><a href="{% url 'blog:home' %}"
                            class="nav-link px-2 link-dark">{% trans "Blog" %}</a>
                     </li>
                     <li><a href="https://wiki.mbcode.io"
                            class="nav-link px-2 link-dark">{% trans "Wiki" %}</a></li>
                 {% else %}
-                    <li class="nav-item"><a href="{% url 'blog:blog_index' %}"
+                    <li class="nav-item"><a href="{% url 'blog:home' %}"
                                             class="nav-link px-2 link-dark">{% trans "Blog" %}</a></li>
                     <li class="nav-item"><a href="#" class="nav-link px-2 link-dark">Archive</a></li>
                 {% endif %}

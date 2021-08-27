@@ -10,18 +10,6 @@
 
         <hr>
 
-        {{ next_year }}
-        <hr>
-        {{ previous_year }}
-        <hr>
-        {{ date_list }}
-        <hr>
-        {{ year }}
-        <hr>
-
-        <hr>
-
-
         {% for month in months %}
 
             <h3><a href="/blog/{{ month.date|date:"Y" }}/{{ month.date|date:"m" }}/">{{ month.date|date:"F" }}</a></h3>
